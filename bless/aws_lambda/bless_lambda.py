@@ -170,6 +170,15 @@ def lambda_handler(event, context=None, ca_private_key_password=None,
     for username in request.remote_usernames.split(','):
         cert_builder.add_valid_principal(username)
 
+
+    # 2018022:rstump
+    # Support dynamic principals based on group membership in IAM
+    iam_client = boto3.client('iam', region_name=region)
+    iam_response = iam_client.list_groups_for_user(UserName = request.bastion_user)
+    for group in iam_response.get("Groups",[ ]):
+        if group['Path'] == '/bless/':
+            cert_builder.add_valid_principal(group['GroupName'].lower())
+
     cert_builder.set_valid_before(valid_before)
     cert_builder.set_valid_after(valid_after)
 
