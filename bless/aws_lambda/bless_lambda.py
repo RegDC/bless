@@ -171,13 +171,17 @@ def lambda_handler(event, context=None, ca_private_key_password=None,
         cert_builder.add_valid_principal(username)
 
 
-    # 2018022:rstump
+    # 20180222:rstump
     # Support dynamic principals based on group membership in IAM
     iam_client = boto3.client('iam', region_name=region)
     iam_response = iam_client.list_groups_for_user(UserName = request.bastion_user)
     for group in iam_response.get("Groups",[ ]):
         if group['Path'] == '/bless/':
             cert_builder.add_valid_principal(group['GroupName'].lower())
+
+    # 20180223:rstump
+    # Support {}-admin format principals for integration with on-prem
+    cert_builder.add_valid_principal('{}-admin'.format(request.bastion_user))
 
     cert_builder.set_valid_before(valid_before)
     cert_builder.set_valid_after(valid_after)
