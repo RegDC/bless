@@ -179,10 +179,6 @@ def lambda_handler(event, context=None, ca_private_key_password=None,
         if group['Path'] == '/bless/':
             cert_builder.add_valid_principal(group['GroupName'].lower())
 
-    # 20180223:rstump
-    # Support {}-admin format principals for integration with on-prem
-    cert_builder.add_valid_principal('{}-admin'.format(request.bastion_user))
-
     cert_builder.set_valid_before(valid_before)
     cert_builder.set_valid_after(valid_after)
 
